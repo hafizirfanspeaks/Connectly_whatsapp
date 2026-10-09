@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import { toast } from 'sonner';
 import { useAuthStore } from '../store/useAuthStore';
-import { FaWhatsapp, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaWhatsapp, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0); 
+  const [progress, setProgress] = useState(0);
+  const [showPassword, setShowPassword] = useState(false); // ✅ NEW
   const { setAuthUser, setToken } = useAuthStore();
   const navigate = useNavigate();
 
@@ -21,10 +22,9 @@ const Login = () => {
 
     const loadingToast = toast.loading('Logging into Connectly...');
 
-    // ✅ Fake Progress Logic
     let currentProgress = 0;
     const interval = setInterval(() => {
-      currentProgress += Math.floor(Math.random() * 5) + 2; 
+      currentProgress += Math.floor(Math.random() * 5) + 2;
       if (currentProgress >= 95) {
         currentProgress = 95;
         clearInterval(interval);
@@ -32,7 +32,6 @@ const Login = () => {
       setProgress(currentProgress);
     }, 200);
 
-    // ✅ TRY BLOCK: Jab sab kuch sahi chale
     try {
       const res = await axios.post('/auth/login', formData);
       const { _id, username, email, profilePic, token } = res.data;
@@ -40,41 +39,27 @@ const Login = () => {
       setAuthUser({ _id, username, email, profilePic });
       setToken(token);
 
-      // Success: Progress ko 100% karein aur interval band karein
       clearInterval(interval);
       setProgress(100);
-      
+
       toast.success(`Welcome back to Connectly, ${username}!`, { id: loadingToast });
 
-      // 1.5 seconds wait karein taake user 100% dekh sake, phir navigate karein
       setTimeout(() => navigate('/'), 1500);
-
-    } 
-    // ✅ CATCH BLOCK: Agar login fail ho jaye
-    catch (error) {
-      clearInterval(interval); 
-      
+    } catch (error) {
+      clearInterval(interval);
       toast.error(error.response?.data?.message || 'Invalid email or password', {
         id: loadingToast,
       });
-      
       setProgress(0);
-    } 
-    // ✅ FINALLY BLOCK: Yeh hamesha chalega
-    finally {
-      setLoading(false); 
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    // ✅ 'bg-linear-to-br' (Tailwind v4)
     <div className="min-h-screen flex flex-col justify-between bg-linear-to-br from-gray-900 via-gray-800 to-black p-4">
-      
-      {/* Center Content Area */}
-      {/* ✅ 'grow' (Tailwind v4 replacement for flex-grow) */}
       <div className="grow flex items-center justify-center mt-8">
         <div className="max-w-md w-full bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700">
-          
           <div className="flex flex-col items-center mb-8">
             <FaWhatsapp className="text-6xl text-whatsapp-primary mb-2" />
             <h2 className="text-2xl font-bold text-white text-center">Welcome to Connectly</h2>
@@ -93,17 +78,26 @@ const Login = () => {
                 required
               />
             </div>
-            
+
+            {/* ✅ Password with Show/Hide Toggle */}
             <div className="relative">
               <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 value={formData.password}
-                className="w-full pl-12 pr-4 py-3 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary transition-all"
+                className="w-full pl-12 pr-12 py-3 bg-gray-900/50 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-whatsapp-primary transition-all"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-whatsapp-primary transition-colors focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+              </button>
             </div>
 
             <button
@@ -124,32 +118,18 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Footer / Reserved Message */}
       <div className="text-center text-gray-500 text-xs sm:text-sm mt-8 mb-2">
         © {new Date().getFullYear()} Irfanz Solution. All rights reserved.
       </div>
 
-      {/* Percentage-wise Center Loader */}
       {loading && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center z-50">
           <div className="relative w-28 h-28 mb-6">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle
-                className="text-gray-700 stroke-current"
-                strokeWidth="6"
-                cx="50"
-                cy="50"
-                r="44"
-                fill="transparent"
-              ></circle>
+              <circle className="text-gray-700 stroke-current" strokeWidth="6" cx="50" cy="50" r="44" fill="transparent"></circle>
               <circle
                 className="text-whatsapp-primary stroke-current transition-all duration-300 ease-out"
-                strokeWidth="6"
-                strokeLinecap="round"
-                cx="50"
-                cy="50"
-                r="44"
-                fill="transparent"
+                strokeWidth="6" strokeLinecap="round" cx="50" cy="50" r="44" fill="transparent"
                 strokeDasharray="276"
                 strokeDashoffset={276 - (276 * progress) / 100}
               ></circle>
