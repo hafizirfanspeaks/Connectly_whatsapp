@@ -67,11 +67,12 @@ const Login = () => {
   };
 
   return (
-    // ✅ Tailwind v4 ke liye 'bg-linear-to-br'
+    // ✅ 'bg-linear-to-br' (Tailwind v4)
     <div className="min-h-screen flex flex-col justify-between bg-linear-to-br from-gray-900 via-gray-800 to-black p-4">
       
       {/* Center Content Area */}
-      <div className="flex-grow flex items-center justify-center mt-8">
+      {/* ✅ 'grow' (Tailwind v4 replacement for flex-grow) */}
+      <div className="grow flex items-center justify-center mt-8">
         <div className="max-w-md w-full bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700">
           
           <div className="flex flex-col items-center mb-8">

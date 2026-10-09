@@ -1,40 +1,52 @@
-// import { createContext, useEffect, useContext } from 'react';
-// import { io } from 'socket.io-client';
-// import { useAuthStore } from '../store/useAuthStore';
+import { createContext, useEffect, useContext, useState } from 'react';
+import { io } from 'socket.io-client';
+import { useAuthStore } from '../store/useAuthStore';
 
-// const SocketContext = createContext();
+const SocketContext = createContext();
 
-// export const useSocket = () => useContext(SocketContext);
+export const useSocket = () => useContext(SocketContext);
 
-// export const SocketProvider = ({ children }) => {
-//   const { authUser, setOnlineUsers, setSocket } = useAuthStore();
+export const SocketProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const { authUser } = useAuthStore();
 
-//   useEffect(() => {
-//     if (!authUser) return;
+  useEffect(() => {
+    // Agar user login nahi hai, toh socket connect karne ki zaroorat nahi
+    if (!authUser) {
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
+      return;
+    }
 
-//     // ✅ Backend URL (apna .env se lein)
-//     const socket = io('http://localhost:5000', {
-//       query: { userId: authUser._id },
-//       withCredentials: true,
-//     });
+    // ✅ Backend URL (Vercel)
+    const newSocket = io('https://whats-app-irfan.vercel.app', {
+      query: { userId: authUser._id },
+      withCredentials: true,
+      transports: ['websocket', 'polling'], // Vercel ke liye yeh zaroori hai
+    });
 
-//     setSocket(socket);
-//     socket.emit('addUser', authUser._id);
+    setSocket(newSocket);
+    newSocket.emit('addUser', authUser._id);
 
-//     // ✅ Real-time online users update
-//     socket.on('getOnlineUsers', (users) => {
-//       setOnlineUsers(users);
-//     });
+    // ✅ Real-time online users update
+    newSocket.on('getOnlineUsers', (users) => {
+      setOnlineUsers(users);
+    });
 
-//     return () => {
-//       socket.disconnect();
-//       setSocket(null);
-//     };
-//   }, [authUser, setOnlineUsers, setSocket]);
+    // Cleanup function
+    return () => {
+      newSocket.disconnect();
+      setSocket(null);
+    };
+  }, [authUser]); // Sirf authUser par depend karega
 
-//   return (
-//     <SocketContext.Provider value={{}}>
-//       {children}
-//     </SocketContext.Provider>
-//   );
-// };
+  return (
+    // ✅ FIX: value={{}} ki jagah socket aur onlineUsers pass karein
+    <SocketContext.Provider value={{ socket, onlineUsers }}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
