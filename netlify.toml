@@ -1,0 +1,22 @@
+# netlify.toml
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# React Router (SPA) ke liye zaroori redirect
+# Agar aap koi route refresh karein to 404 error na aaye
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security Headers (Professional Security)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://whats-app-irfan.vercel.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://res.cloudinary.com; connect-src 'self' https://whats-app-irfan.vercel.app wss://whats-app-irfan.vercel.app;"
