@@ -9,7 +9,6 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
   const [showReactions, setShowReactions] = useState(false);
   const menuRef = useRef(null);
 
-  // ✅ Click outside se menu band karein
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -28,7 +27,6 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
     minute: '2-digit',
   });
 
-  // ✅ Tick Logic
   const renderTicks = () => {
     if (!isMine) return null;
     if (message.read) {
@@ -40,7 +38,6 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
     return <FaCheck size={12} className="text-gray-300" title="Sent" />;
   };
 
-  // ✅ Reactions group karein
   const getGroupedReactions = () => {
     if (!message.reactions || message.reactions.length === 0) return [];
     const grouped = {};
@@ -53,14 +50,13 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
 
   const groupedReactions = getGroupedReactions();
 
-  // ✅ Current user ka reaction
   const myReaction = message.reactions?.find(
     (r) => r.user === currentUserId || r.user?._id === currentUserId
   );
 
   return (
     <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-2 group`}>
-      <div className="relative max-w-[75%]">
+      <div className="relative max-w-[85%] md:max-w-[75%]">
         <div
           className={`px-3 py-2 rounded-lg shadow-sm text-sm relative ${
             isMine
@@ -68,7 +64,6 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
               : 'bg-whatsapp-incoming text-white rounded-tl-none'
           }`}
         >
-          {/* Image */}
           {message.messageType === 'image' && (
             <img
               src={message.fileUrl}
@@ -78,7 +73,6 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
             />
           )}
 
-          {/* Video */}
           {message.messageType === 'video' && (
             <video
               src={message.fileUrl}
@@ -87,26 +81,22 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
             />
           )}
 
-          {/* Audio */}
           {message.messageType === 'audio' && (
             <div className="flex items-center gap-3 min-w-50 mb-1">
               <audio src={message.fileUrl} controls className="w-full h-10" />
             </div>
           )}
 
-          {/* Text */}
           {message.message && (
-            <p className="wrap-break-word pr-14">{message.message}</p>
+            <p className="wrap-break-word whitespace-pre-wrap pr-14">{message.message}</p>
           )}
 
-          {/* Time + Tick */}
           <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-gray-300">
             <span>{time}</span>
             {renderTicks()}
           </div>
         </div>
 
-        {/* ✅ Reactions Display */}
         {groupedReactions.length > 0 && (
           <div className={`flex gap-1 mt-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
             {groupedReactions.map(({ emoji, count }) => (
@@ -125,25 +115,24 @@ const Message = ({ message, isMine, isReceiverOnline, currentUserId, onDelete, o
           </div>
         )}
 
-        {/* ✅ Hover Menu Button (3 dots) */}
+        {/* 3 Dots Menu: Mobile par opacity-100 (hamesha visible), Desktop par hover par dikhega */}
         <div
           ref={menuRef}
           className={`absolute top-1 ${
             isMine ? '-left-8' : '-right-8'
-          } ${showMenu ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition`}
+          } opacity-100 md:opacity-0 md:group-hover:opacity-100 transition z-10`}
         >
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="w-6 h-6 flex items-center justify-center rounded-full bg-whatsapp-header text-gray-400 hover:text-white cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-whatsapp-header text-gray-400 hover:text-white cursor-pointer shadow-md border border-gray-700/50"
             title="Options"
           >
-            <FaEllipsisV size={12} />
+            <FaEllipsisV size={14} />
           </button>
 
-          {/* ✅ Dropdown Menu */}
           {showMenu && (
             <div
-              className={`absolute top-7 ${
+              className={`absolute top-9 ${
                 isMine ? 'left-0' : 'right-0'
               } bg-whatsapp-header border border-gray-700 rounded-lg shadow-xl z-50 w-44 overflow-hidden`}
             >
