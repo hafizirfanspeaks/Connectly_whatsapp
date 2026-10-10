@@ -19,5 +19,5 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    # ✅ UPDATED: img-src aur media-src mein blob: add kiya
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://whats-app-irfan.vercel.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; media-src 'self' blob: https://res.cloudinary.com; connect-src 'self' https://whats-app-irfan.vercel.app wss://whats-app-irfan.vercel.app;"
+    # ✅ UPDATED: script-src mein blob: add kiya, aur worker-src add kiya
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' blob: https://whats-app-irfan.vercel.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://res.cloudinary.com; media-src 'self' blob: https://res.cloudinary.com; connect-src 'self' https://whats-app-irfan.vercel.app wss://whats-app-irfan.vercel.app; worker-src 'self' blob:;"
