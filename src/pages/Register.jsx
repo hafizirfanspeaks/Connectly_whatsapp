@@ -1,7 +1,9 @@
+// Frontend/src/pages/Register.jsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression'; // ✅ NAYA IMPORT
 import { FaWhatsapp, FaUser, FaEnvelope, FaLock, FaCamera, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register = () => {
@@ -10,14 +12,14 @@ const Register = () => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [showPassword, setShowPassword] = useState(false); // ✅ NEW
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
-      setPreview(URL.createObjectURL(file));
+      setPreview(URL.createObjectURL(file)); // Blob URL for preview (CSP mein blob: allowed hai)
     }
   };
 
@@ -30,11 +32,34 @@ const Register = () => {
 
     const loadingToast = toast.loading('Creating your Connectly account...');
 
+    let imageToUpload = image;
+
+    // ✅ IMAGE COMPRESSION LOGIC (413 Error Fix)
+    if (image) {
+      toast.loading('Compressing image...', { id: loadingToast });
+      const options = {
+        maxSizeMB: 1, // 1 MB se kam
+        maxWidthOrHeight: 1024, // Max 1024px
+        useWebWorker: true,
+      };
+      try {
+        imageToUpload = await imageCompression(image, options);
+        console.log('Original size:', (image.size / 1024 / 1024).toFixed(2), 'MB');
+        console.log('Compressed size:', (imageToUpload.size / 1024 / 1024).toFixed(2), 'MB');
+      } catch (error) {
+        console.error('Image compression error:', error);
+        toast.error('Failed to compress image. Please try a smaller one.', { id: loadingToast });
+        setLoading(false);
+        return;
+      }
+      toast.loading('Creating your Connectly account...', { id: loadingToast });
+    }
+
     const data = new FormData();
     data.append('username', formData.username);
     data.append('email', formData.email);
     data.append('password', formData.password);
-    if (image) data.append('profilePic', image);
+    if (imageToUpload) data.append('profilePic', imageToUpload);
 
     let currentProgress = 0;
     const interval = setInterval(() => {
@@ -77,7 +102,8 @@ const Register = () => {
   };
 
   return (
-    <div className="h-screen w-full overflow-y-auto flex flex-col bg-linear-to-br from-gray-900 via-gray-800 to-black">
+    // h-screen ki jagah min-h-dvh use kiya (Tailwind v4 mobile standard)
+    <div className="min-h-dvh w-full overflow-y-auto flex flex-col bg-linear-to-br from-gray-900 via-gray-800 to-black">
       <div className="flex-1 flex flex-col justify-center items-center p-4 py-10">
         <div className="max-w-md w-full bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700">
           <div className="flex flex-col items-center mb-6">
